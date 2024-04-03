@@ -1,5 +1,5 @@
 import uvicorn
-from fastapi import APIRouter, FastAPI, HTTPException, status
+from fastapi import APIRouter, FastAPI, HTTPException, Request, status
 
 from routes.auth_route import users
 from routes.carts_route import carts
@@ -23,7 +23,7 @@ def init(routes_list:list[APIRouter]):
 
     # add custom exception handlers
     @app.exception_handler(CustomPrismaException)
-    def custom_prisma_exception_handler(exc:CustomPrismaException):
+    def custom_prisma_exception_handler(request:Request,exc:CustomPrismaException):
         raise HTTPException(
             status_code=exc.status_code,
             detail=[

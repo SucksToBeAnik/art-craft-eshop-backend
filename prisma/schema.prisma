@@ -21,6 +21,7 @@ model User {
     phone_number String[]
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt
+    is_admin Boolean @default(false)
 
     user_type UserType @default(CUSTOMER)
 
