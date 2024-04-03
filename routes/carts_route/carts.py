@@ -2,11 +2,11 @@ from fastapi import APIRouter
 
 
 router = APIRouter(
-    prefix="/users",
-    tags=['Users']
+    prefix="/carts",
+    tags=['Carts']
 )
 
 
 @router.get('/')
 async def get_all_carts():
-    return 'There are currently no users'
+    return 'There are currently no carts'

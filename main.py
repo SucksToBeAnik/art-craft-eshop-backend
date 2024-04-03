@@ -1,11 +1,14 @@
 import uvicorn
-from fastapi import APIRouter, FastAPI
+from fastapi import APIRouter, FastAPI, HTTPException, status
 
-from routes import carts
-from routes.auth import users
-from routes.products import products
-from routes.reviews import reviews
-from routes.shops import shops
+from routes.auth_route import users
+from routes.carts_route import carts
+from routes.orders_route import orders
+from routes.products_route import products
+from routes.reviews_route import reviews
+from routes.shops_route import shops
+
+from utils.exceptions import CustomPrismaException
 
 
 # Function that returns a fastapi instance after necessary modifications
@@ -14,14 +17,31 @@ def init(routes_list:list[APIRouter]):
         title="Art&Craft Eshop",
         version="0.0.1"
     )
-
     # list comprehension. Includes all of our api routes in the main app
     [app.include_router(route) for route in routes_list]
 
+
+    # add custom exception handlers
+    @app.exception_handler(CustomPrismaException)
+    def custom_prisma_exception_handler(exc:CustomPrismaException):
+        raise HTTPException(
+            status_code=exc.status_code,
+            detail=[
+                {
+                    "msg":exc.error_msg
+                }
+            ]
+        )
+
     return app
 
-routes_list = [carts.router, products.router, reviews.router, shops.router, users.router]
+
+
+routes_list = [users.router, carts.router, orders.router, products.router, reviews.router, shops.router]
+
+
 app = init(routes_list)
+
 
 
 @app.get('/')
