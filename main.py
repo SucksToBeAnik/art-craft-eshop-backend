@@ -1,7 +1,11 @@
 import uvicorn
 from fastapi import APIRouter, FastAPI
 
-from routes import carts, products, reviews, shops, users
+from routes import carts
+from routes.auth import users
+from routes.products import products
+from routes.reviews import reviews
+from routes.shops import shops
 
 
 # Function that returns a fastapi instance after necessary modifications

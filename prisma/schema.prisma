@@ -1,0 +1,134 @@
+datasource db {
+    provider = "postgresql"
+    url = env("DATABASE_URL")
+}
+
+generator db {
+    provider = "prisma-client-py"
+    interface = "asyncio"
+    recursive_type_depth = 5
+}
+
+model User {
+    user_id String @id @default(cuid())
+    full_name String 
+    bio String?
+    email String @unique
+    image String?
+    address String
+    balance Int
+    phone_number Int[]
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    user_type UserType @default(CUSTOMER)
+
+
+    // user can have many shops 
+    shops Shop[]
+
+    // user can have many carts
+    carts Cart[]
+
+    // user can buy many products
+    bought_products Product[]
+
+    // user can leave many reviews
+    reviews Review[]
+}
+
+enum UserType {
+    CUSTOMER
+    SELLER
+}
+
+model Shop {
+    shop_id String @id @default(cuid())
+    name String
+    description String?
+    location String?
+    website String?
+    launch_date DateTime @default(now())
+
+    owner_id String
+    owner User @relation(fields: [owner_id],references: [user_id],onDelete: Cascade)
+
+    // can own many products
+    products Product[]
+
+    // can have many reviews
+    reviews Review[]
+
+
+}
+
+model Product {
+    product_id String @id @default(cuid())
+    name String @unique
+    description String?
+    manufacturer String?
+    images String[]
+    price Int
+    available Boolean
+    discount Int?
+
+
+    product_type ProductType
+
+    customer_id String?
+    customer User? @relation(fields: [customer_id],references: [user_id],onDelete: SetNull)
+
+    owner_shop_id String
+    owner_shop Shop @relation(fields: [owner_shop_id],references: [shop_id],onDelete: Cascade)
+
+    owner_cart_id String?
+    cart Cart? @relation(fields: [owner_cart_id],references: [cart_id])
+
+    // can have many reviews
+    reviews Review[]
+    
+}
+
+enum ProductType {
+    ARTWORK
+    SCULPTURE
+    OTHER
+}
+
+model Order {
+    order_id String @id @default(cuid())
+    created_at DateTime @default(now())
+
+    owner_cart_id String @unique
+    owner_cart Cart @relation(fields: [owner_cart_id],references: [cart_id],onDelete:Cascade )
+
+}
+
+model Cart {
+    cart_id String @id @default(cuid())
+    created_at DateTime @default(now())
+    updated_at DateTime @updatedAt
+
+    cart_owner_id String
+    cart_owner User @relation(fields: [cart_owner_id], references: [user_id])
+
+    order Order?
+
+
+    products Product[]
+}
+
+model Review {
+    review_id String @id @default(cuid())
+
+    owner_id String
+    owner User @relation(fields: [owner_id],references: [user_id],onDelete: Cascade)
+
+    reviewd_product_id String?
+    reviewd_product Product? @relation(fields: [reviewd_product_id],references: [product_id],onDelete: Cascade)
+
+    reviewd_shop_id String?
+    reviewd_shop Shop? @relation(fields: [reviewd_shop_id],references: [shop_id],onDelete: Cascade)
+
+
+}
