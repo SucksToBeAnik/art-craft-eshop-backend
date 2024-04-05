@@ -35,5 +35,5 @@ class User(BaseModel):
         return self
 
 class LoginCredentials(BaseModel):
-    email: EmailStr
+    email: str
     password: str

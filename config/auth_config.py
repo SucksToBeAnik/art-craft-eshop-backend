@@ -34,7 +34,6 @@ async def validate_login_credentials(login_credentials:LoginCredentials, token_e
 
         data_to_encode = {
             "email":user.email,
-            "password":user.password,
             "exp": token_expires_at
         }
         token = await generate_jwt_token(data_to_encode)

@@ -21,7 +21,7 @@ router = APIRouter(
 )
 
 
-@router.get('/users',dependencies=[Depends(get_authorized_user)])
+@router.get('/users',)
 async def get_all_users(db: Client = Depends(get_db_connection)):
     
     try:
@@ -31,7 +31,12 @@ async def get_all_users(db: Client = Depends(get_db_connection)):
     
     return users
 
-@router.post('/users/new')
+@router.get('/me')
+async def get_active_user(user = Depends(get_authorized_user)):
+    return user
+
+
+@router.post('/register')
 async def register_new_user(user_data:User, db:Client = Depends(get_db_connection)):
     is_admin = False
     print(Settings.admin_emails)
@@ -65,7 +70,7 @@ async def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     credentials = LoginCredentials(email=form_data.username, password=form_data.password)
 
     token = await validate_login_credentials(credentials,timedelta(hours=1), db)
-
+        
     return {
         "access_token":token
     }
