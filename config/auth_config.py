@@ -33,7 +33,7 @@ async def validate_login_credentials(login_credentials:LoginCredentials, token_e
         token_expires_at = datetime.now(timezone.utc) + token_expire_time or timedelta(hours=24)
 
         data_to_encode = {
-            "email":user.email,
+            "sub":user.email,
             "exp": token_expires_at
         }
         token = await generate_jwt_token(data_to_encode)
@@ -58,7 +58,7 @@ async def generate_jwt_token(data:dict):
 async def get_authorized_user(token: Annotated[str, Depends(oauth2_scheme)], db:Client=Depends(get_db_connection)):
     try:
         payload = jwt.decode(token,secret_key, algorithms=["HS256"])
-        email = payload.get("email")
+        email = payload.get("sub")
         if email is None:
             raise CustomAuthorizationException(error_msg="Could not validate credentials. User not logged in.")
         
