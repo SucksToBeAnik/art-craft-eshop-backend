@@ -1,5 +1,6 @@
 import uvicorn
-from fastapi import APIRouter, FastAPI, HTTPException, Request, status
+from fastapi import APIRouter, FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 
 from routes.auth_route import users
 from routes.carts_route import carts
@@ -21,6 +22,14 @@ def init(routes_list: list[APIRouter]):
     # list comprehension. Includes all of our api routes in the main app
     [app.include_router(route) for route in routes_list]
 
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     # add custom exception handlers
     @app.exception_handler(CustomGeneralException)
     def custom_general_exception_handler(request: Request, exc: CustomGeneralException):
@@ -37,6 +46,8 @@ def init(routes_list: list[APIRouter]):
         raise HTTPException(
             status_code=exc.status_code, detail=[{"msg": exc.error_msg}]
         )
+    
+    
 
     return app
 
