@@ -1,7 +1,8 @@
 from datetime import timedelta
+from enum import Enum
 from typing import Annotated
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from fastapi.security import OAuth2PasswordRequestForm
 from prisma.errors import PrismaError
 
@@ -9,7 +10,9 @@ from config.auth_config import validate_login_credentials, get_authorized_user
 from config.db_config import get_db_connection
 from config.settings import Settings
 from prisma import Client
-from utils.exceptions import CustomPrismaException
+from prisma.models import User as UserSchema
+from utils.exceptions import CustomPrismaException, CustomGeneralException, CustomRoleException
+from config.auth_config import get_authorized_user
 
 from .model import LoginCredentials, User
 
@@ -21,9 +24,9 @@ router = APIRouter(
 )
 
 
+
 @router.get('/users',)
 async def get_all_users(db: Client = Depends(get_db_connection)):
-    
     try:
         users = await db.user.find_many()
     except PrismaError as e:
@@ -31,9 +34,47 @@ async def get_all_users(db: Client = Depends(get_db_connection)):
     
     return users
 
+
+@router.get('/users/{id}',)
+async def get_specific_user(id:str,db: Client = Depends(get_db_connection)):
+    try:
+        user = await db.user.find_first(where={
+            "user_id":id
+        })
+        if user is None:
+            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="User does not exist")
+    except PrismaError as e:
+        raise CustomPrismaException(error_msg=str(e))
+    
+    return user
+
+
+
 @router.get('/me')
 async def get_active_user(user = Depends(get_authorized_user)):
     return user
+
+@router.patch('/me/switch')
+async def switch_user_account_type(db: Client = Depends(get_db_connection), user: UserSchema = Depends(get_authorized_user)):
+    if user.user_type == "CUSTOMER":
+        new_user_type =   "SELLER"  
+    else:
+        new_user_type = "CUSTOMER"
+        
+    try:
+        updated_user = await db.user.update(where={
+            "user_id":user.user_id
+        }, data={
+            "user_type": new_user_type
+        })
+        if not updated_user:
+            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Could not find user account")
+    except PrismaError as e:
+        raise CustomPrismaException(str(e))
+    
+    return {
+        "msg":f"Switched to {updated_user.user_type} account"
+    }
 
 
 @router.post('/register')
@@ -60,10 +101,7 @@ async def register_new_user(user_data:User, db:Client = Depends(get_db_connectio
     except PrismaError as e:
         raise CustomPrismaException(error_msg=str(e))
     
-    return {
-        "msg":"Registration completed!",
-        "user": new_user
-    }
+    return new_user
 
 @router.post("/login")
 async def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()], db: Client = Depends(get_db_connection)):
@@ -73,5 +111,21 @@ async def login_user(form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
         
     return {
         "access_token":token
+    }
+
+
+@router.delete("/delete/{user_id}")
+async def delete_user(user_id: str, db:Client = Depends(get_db_connection), user:UserSchema = Depends(get_authorized_user)):
+    if(user_id != user.user_id and not user.is_admin):
+        raise CustomRoleException(role_can_access="OWNER")
+    try:
+        deleted_user = await db.user.delete(where={
+            "user_id": user_id
+        })
+    except PrismaError as e:
+        raise CustomPrismaException(str(e))
+    
+    return {
+        "deleted_user": deleted_user
     }
 

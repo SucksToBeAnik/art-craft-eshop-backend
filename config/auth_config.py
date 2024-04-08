@@ -60,15 +60,21 @@ async def get_authorized_user(token: Annotated[str, Depends(oauth2_scheme)], db:
         payload = jwt.decode(token,secret_key, algorithms=["HS256"])
         email = payload.get("sub")
         if email is None:
-            raise CustomAuthorizationException(error_msg="Could not validate credentials. User not logged in.")
+            raise CustomAuthorizationException(error_msg="Could not validate credentials. User is not logged in.")
         
     except JWTError:
-        raise CustomAuthorizationException(error_msg="Could not validate credentials. User not logged in.")
+        raise CustomAuthorizationException(error_msg="Could not validate credentials. User is not logged in.")
     
     user = await db.user.find_first(where={
         "email":email
     })
     if user is None:
-        raise CustomAuthorizationException(error_msg="Could not validate credentials. Invalid email address provided.")
+        raise CustomAuthorizationException(error_msg="Could not validate credentials. User does not exist.")
     return user
+
+
+
+
+
+
 

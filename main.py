@@ -13,6 +13,7 @@ from utils.exceptions import (
     CustomGeneralException,
     CustomPrismaException,
     CustomAuthorizationException,
+    CustomRoleException
 )
 
 
@@ -43,6 +44,11 @@ def init(routes_list: list[APIRouter]):
 
     @app.exception_handler(CustomAuthorizationException)
     def custom_authorization_exception_handler(request:Request,exc: CustomAuthorizationException):
+        raise HTTPException(
+            status_code=exc.status_code, detail=[{"msg": exc.error_msg}]
+        )
+    @app.exception_handler(CustomRoleException)
+    def custom_role_exception_handler(request:Request,exc: CustomRoleException):
         raise HTTPException(
             status_code=exc.status_code, detail=[{"msg": exc.error_msg}]
         )

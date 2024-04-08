@@ -24,7 +24,7 @@ model User {
     updated_at DateTime @updatedAt
     is_admin Boolean @default(false)
 
-    user_type UserType @default(CUSTOMER)
+    user_type String @default("CUSTOMER")
 
 
     // user can have many shops 
@@ -40,14 +40,11 @@ model User {
     reviews Review[]
 }
 
-enum UserType {
-    CUSTOMER
-    SELLER
-}
+
 
 model Shop {
     shop_id String @id @default(cuid())
-    name String
+    name String @unique
     description String?
     location String?
     website String?
@@ -76,7 +73,7 @@ model Product {
     discount Int?
 
 
-    product_type ProductType
+    product_type String
 
     customer_id String?
     customer User? @relation(fields: [customer_id],references: [user_id],onDelete: SetNull)
@@ -92,11 +89,11 @@ model Product {
     
 }
 
-enum ProductType {
-    ARTWORK
-    SCULPTURE
-    OTHER
-}
+// enum ProductType {
+//     ARTWORK
+//     SCULPTURE
+//     OTHER
+// }
 
 model Order {
     order_id String @id @default(cuid())
