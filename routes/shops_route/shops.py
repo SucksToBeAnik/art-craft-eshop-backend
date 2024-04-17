@@ -21,7 +21,9 @@ async def get_all_shops(
     db: Client = Depends(get_db_connection),
 ):
     try:
-        shops = await db.shop.find_many(take=limit)
+        shops = await db.shop.find_many(take=limit, include={
+            "owner":True
+        })
     except PrismaError as e:
         raise CustomPrismaException(error_msg=str(e))
     return shops
@@ -67,7 +69,7 @@ async def get_specific_user_shops(
     return shops
 
 
-@router.post("/new")
+@router.post("/new", status_code=status.HTTP_201_CREATED)
 async def create_a_shop(
     shop_data: Shop,
     db: Client = Depends(get_db_connection),
@@ -87,7 +89,7 @@ async def create_a_shop(
                 "name": shop_data.name,
                 "description": shop_data.description,
                 "location": shop_data.location,
-                "website": shop_data.location,
+                "website": shop_data.website,
                 "owner_id": shop_data.owner_id,
             },
             include={"owner": True},

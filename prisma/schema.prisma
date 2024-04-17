@@ -69,7 +69,7 @@ model Product {
     manufacturer String?
     images String[]
     price Int
-    available Boolean
+    available Boolean @default(true)
     discount Int?
 
 
