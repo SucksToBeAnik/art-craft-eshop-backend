@@ -32,9 +32,9 @@ class CustomRoleException(Exception):
         self.role_can_access = role_can_access
 
         if self.role_can_access == "CUSTOMER":
-            self.error_msg = "Only an Admin or a Customer can perform this action"
+            self.error_msg = "Only an Admin or a Customer can perform this action. Switch to customer account."
         elif self.role_can_access == "SELLER":
-            self.error_msg = "Only an Admin or a Seller can perform this action"
+            self.error_msg = "Only an Admin or a Seller can perform this action. Switch to seller account."
         elif self.role_can_access == "OWNER":
             self.error_msg = "Only an Admin or its owner can perform this action"
 

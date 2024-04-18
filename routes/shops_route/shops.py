@@ -40,6 +40,8 @@ async def get_shop_by_id(shop_id: str, db: Client = Depends(get_db_connection)):
             )
     except PrismaError as e:
         raise CustomPrismaException(str(e))
+    
+    return shop
 
 
 @router.get("/{shop_name}")
@@ -53,6 +55,8 @@ async def get_shop_by_name(shop_name: str, db: Client = Depends(get_db_connectio
             )
     except PrismaError as e:
         raise CustomPrismaException(str(e))
+    
+    return shop
 
 
 @router.get("/owner/{user_id}")
