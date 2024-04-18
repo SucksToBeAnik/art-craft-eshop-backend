@@ -111,7 +111,7 @@ async def switch_user_account_type(db: Client = Depends(get_db_connection), user
     except PrismaError as e:
         raise CustomPrismaException(str(e))
     
-    return updated_user
+    return updated_user.user_type
 
 @router.delete("/delete/{user_id}")
 async def delete_user(user_id: str, db:Client = Depends(get_db_connection), user:UserSchema = Depends(get_authorized_user)):
