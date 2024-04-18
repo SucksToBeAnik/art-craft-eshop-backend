@@ -7,8 +7,11 @@ from prisma.models import User
 from config.auth_config import get_authorized_user
 from config.db_config import get_db_connection
 from prisma import Client
-from utils.exceptions import (CustomGeneralException, CustomPrismaException,
-                              CustomRoleException)
+from utils.exceptions import (
+    CustomGeneralException,
+    CustomPrismaException,
+    CustomRoleException,
+)
 
 from .model import Shop, UpdateShop
 
@@ -21,9 +24,7 @@ async def get_all_shops(
     db: Client = Depends(get_db_connection),
 ):
     try:
-        shops = await db.shop.find_many(take=limit, include={
-            "owner":True
-        })
+        shops = await db.shop.find_many(take=limit, include={"owner": True})
     except PrismaError as e:
         raise CustomPrismaException(error_msg=str(e))
     return shops
@@ -32,7 +33,10 @@ async def get_all_shops(
 @router.get("/{shop_id}")
 async def get_shop_by_id(shop_id: str, db: Client = Depends(get_db_connection)):
     try:
-        shop = await db.shop.find_first(where={"shop_id": shop_id})
+        shop = await db.shop.find_first(
+            where={"shop_id": shop_id},
+            include={"owner": True, "products": True, "reviews": True},
+        )
         if shop is None:
             raise CustomGeneralException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -40,14 +44,17 @@ async def get_shop_by_id(shop_id: str, db: Client = Depends(get_db_connection)):
             )
     except PrismaError as e:
         raise CustomPrismaException(str(e))
-    
+
     return shop
 
 
 @router.get("/{shop_name}")
 async def get_shop_by_name(shop_name: str, db: Client = Depends(get_db_connection)):
     try:
-        shop = await db.shop.find_first(where={"name": shop_name})
+        shop = await db.shop.find_first(
+            where={"name": shop_name},
+            include={"owner": True, "products": True, "reviews": True},
+        )
         if shop is None:
             raise CustomGeneralException(
                 status_code=status.HTTP_404_NOT_FOUND,
@@ -55,7 +62,7 @@ async def get_shop_by_name(shop_name: str, db: Client = Depends(get_db_connectio
             )
     except PrismaError as e:
         raise CustomPrismaException(str(e))
-    
+
     return shop
 
 
@@ -102,7 +109,6 @@ async def create_a_shop(
         raise CustomPrismaException(error_msg=str(e))
 
     return new_shop
-
 
 
 @router.put("/{id}")
