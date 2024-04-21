@@ -68,7 +68,7 @@ async def get_authorized_user(token: Annotated[str, Depends(oauth2_scheme)], db:
     user = await db.user.find_first(where={
         "email":email
     }, include={
-        "shops":True
+        "shops":True,
     })
     if user is None:
         raise CustomAuthorizationException(error_msg="Could not validate credentials. User does not exist.")

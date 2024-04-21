@@ -34,10 +34,13 @@ model User {
     carts Cart[]
 
     // user can buy many products
-    bought_products Product[]
+    bought_products Product[] @relation(name: "boughtProducts")
 
     // user can leave many reviews
     reviews Review[]
+
+    // user can have favourite products
+    favourite_products Product[] @relation(name: "favouriteProducts")
 }
 
 
@@ -76,16 +79,17 @@ model Product {
     product_type String
 
     customer_id String?
-    customer User? @relation(fields: [customer_id],references: [user_id],onDelete: SetNull)
+    customer User? @relation(fields: [customer_id],references: [user_id],onDelete: SetNull, name: "boughtProducts")
 
     owner_shop_id String
     owner_shop Shop @relation(fields: [owner_shop_id],references: [shop_id],onDelete: Cascade)
 
-    owner_cart_id String?
-    cart Cart? @relation(fields: [owner_cart_id],references: [cart_id])
 
-    // can have many reviews
-    reviews Review[]
+    // can be added in many carts if available
+    carts Cart[]
+
+    // can have many users who has added it to favourite
+    favourited_by User[] @relation(name: "favouriteProducts")
     
 }
 
@@ -124,11 +128,6 @@ model Review {
     owner_id String
     owner User @relation(fields: [owner_id],references: [user_id],onDelete: Cascade)
 
-    reviewd_product_id String?
-    reviewd_product Product? @relation(fields: [reviewd_product_id],references: [product_id],onDelete: Cascade)
-
     reviewd_shop_id String?
     reviewd_shop Shop? @relation(fields: [reviewd_shop_id],references: [shop_id],onDelete: Cascade)
-
-
 }

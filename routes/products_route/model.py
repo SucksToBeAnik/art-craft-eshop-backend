@@ -4,16 +4,25 @@ from typing import Annotated, Optional, Literal
 ProductType = Literal["ARTWORK","SCULPTURE","OTHER"]
 
 
-class CreateProduct(BaseModel):
+
+class Product(BaseModel):
     name: Annotated[str, Field(min_length=3)]
     description: Optional[str] = None
     manufacturer: Optional[str] = None
-    images: list[str]
+    images: list[str] = []
     price: Annotated[int, Field(gt=0)]
-    available: bool = True
     discount: Optional[int] = None
-
     product_type: ProductType
+
+
+
+class CreateProduct(Product):
     owner_shop_id: str
-    # customer_id: Optional[str] = None
-    # owner_cart_id: Optional[str] = None
+
+
+class UpdateProduct(Product):
+    name: Annotated[Optional[str], Field(min_length=3)] = None
+    price: Annotated[Optional[int], Field(gt=0)] = None
+    product_type: Optional[ProductType] = None
+    available: Optional[bool] = None
+
