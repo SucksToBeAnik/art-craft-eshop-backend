@@ -68,8 +68,19 @@ async def create_a_product(
         pass
     else:
         raise CustomRoleException(role_can_access="SELLER")
+    
+
+    
 
     try:
+        user_shops = await db.shop.find_many(where={
+            "owner_id":user.user_id
+        })
+        user_shops_id = [shop.shop_id for shop in user_shops]
+
+        if(product_data.owner_shop_id) not in user_shops_id:
+            raise CustomRoleException(role_can_access="OWNER")
+
         new_product = await db.product.create(
             data={
                 "name": product_data.name,
