@@ -21,10 +21,11 @@ router = APIRouter(prefix="/shops", tags=["Shops"])
 @router.get("/")
 async def get_all_shops(
     limit: Annotated[Optional[int], Query(gt=0, lt=50)] = None,
+    skip: Annotated[Optional[int], Query(gt=0, lt=50)] = None,
     db: Client = Depends(get_db_connection),
 ):
     try:
-        shops = await db.shop.find_many(take=limit, include={"owner": True})
+        shops = await db.shop.find_many(take=limit, skip=skip, include={"owner": True})
     except PrismaError as e:
         raise CustomPrismaException(error_msg=str(e))
     return shops
