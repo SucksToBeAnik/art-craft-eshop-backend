@@ -144,6 +144,40 @@ async def buy_a_product(product_id:str):
     pass
 
 
+@router.patch('/feature/{product_id}')
+async def feature_a_product(product_id:str, db: Client = Depends(get_db_connection), user:User = Depends(get_authorized_user)):
+    try:
+        # check if product exists
+        existing_product = await db.product.find_unique(where={
+            "product_id":product_id
+        },include={
+            "owner_shop":True
+        })
+
+        # check if product belongs to the user
+        if existing_product is not None:
+            existing_product_owner_shop_id = existing_product.owner_shop_id
+            user_shops = await db.shop.find_many(where={
+                "owner_id":user.user_id
+            })
+            user_shops_id = [shop.shop_id for shop in user_shops]
+            if existing_product_owner_shop_id in user_shops_id:
+                updated_product = await db.product.update(where={
+                    "product_id":existing_product.product_id
+                },data={
+                    "featured":True
+                })
+            else:
+                raise CustomRoleException(role_can_access="OWNER")
+        else:
+            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Product does not exist")
+            
+    except PrismaError as e:
+        raise CustomPrismaException(str(e))
+    
+    return updated_product
+
+
 
 @router.patch("/favourites/{product_id}")
 async def add_product_to_favourite(

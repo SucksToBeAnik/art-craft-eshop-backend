@@ -7,7 +7,6 @@ generator db {
     provider = "prisma-client-py"
     interface = "asyncio"
     recursive_type_depth = 5
-    
 }
 
 model User {
@@ -75,6 +74,7 @@ model Product {
     available Boolean @default(true)
     discount Int?
 
+    featured Boolean @default(false)
 
     product_type String
 
@@ -83,6 +83,8 @@ model Product {
 
     owner_shop_id String
     owner_shop Shop @relation(fields: [owner_shop_id],references: [shop_id],onDelete: Cascade)
+
+
 
 
     // can be added in many carts if available

@@ -80,6 +80,34 @@ async def get_specific_user_shops(
     return shops
 
 
+@router.get("/featured/{shop_id}")
+async def get_featured_products(shop_id: str, db: Client=Depends(get_db_connection)):
+    try:
+        existing_shop = await db.shop.find_unique(where={
+            "shop_id":shop_id
+        },include={
+            "products":True
+        })
+
+        if existing_shop is None:
+            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Shop does not exist")
+        else:
+            products = existing_shop.products
+            featured_products = []
+            if products:
+                for i in range(0, len(products)):
+                    if products[i].featured and len(featured_products) < 4:
+                        featured_products.append(products[i])
+    except PrismaError as e:
+        raise CustomPrismaException(error_msg=str(e))
+
+    return featured_products
+
+
+
+
+
+
 @router.post("/new", status_code=status.HTTP_201_CREATED)
 async def create_a_shop(
     shop_data: Shop,
