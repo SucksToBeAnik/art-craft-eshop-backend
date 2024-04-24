@@ -43,7 +43,7 @@ async def get_featured_products_from_all_shops(
         final_data = []
 
         for shop in shops:
-            shop_with_featured_products = await db.product.find_many(where={
+            featured_products = await db.product.find_many(where={
                 "AND":[
                     {
                         "owner_shop_id":shop.shop_id
@@ -55,7 +55,9 @@ async def get_featured_products_from_all_shops(
             })
 
             updated_data = {
-                shop.name: shop_with_featured_products
+                "name":shop.name,
+                "id":shop.shop_id,
+                "products":featured_products
             }
 
             final_data.append(updated_data)
