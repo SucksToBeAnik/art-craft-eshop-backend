@@ -22,7 +22,7 @@ async def search_products(
     return products
 
 
-@router.get("/products/{term}")
+@router.get("/shops/{term}")
 async def search_shops(
     term: Annotated[str, Path(min_length=3)], db: Client = Depends(get_db_connection)
 ):
