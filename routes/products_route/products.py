@@ -6,7 +6,6 @@ from typing import Optional, Annotated
 from config.auth_config import get_authorized_user
 from config.db_config import get_db_connection
 from prisma import Client
-from prisma.types import UserUpdateManyWithoutRelationsInput
 
 from utils.exceptions import (
     CustomAuthorizationException,
@@ -41,7 +40,7 @@ async def get_featured_products_from_all_shops(
     try:
         shops = await db.shop.find_many(take=limit, skip=skip)
 
-        final_data = {}
+        final_data = []
 
         for shop in shops:
             shop_with_featured_products = await db.product.find_many(where={
@@ -55,7 +54,11 @@ async def get_featured_products_from_all_shops(
                 ]
             })
 
-            final_data.update({shop.name:shop_with_featured_products})
+            updated_data = {
+                shop.name: shop_with_featured_products
+            }
+
+            final_data.append(updated_data)
 
         
     except PrismaError as e:
