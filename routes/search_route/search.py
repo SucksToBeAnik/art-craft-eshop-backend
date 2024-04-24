@@ -15,7 +15,7 @@ async def search_products(
     term: Annotated[str, Path(min_length=3)], db: Client = Depends(get_db_connection)
 ):
     try:
-        products = await db.product.find_many(where={"name": {"contains": term}})
+        products = await db.product.find_many(where={"name": {"contains": term, "mode":'insensitive'}})
     except PrismaError as e:
         raise CustomPrismaException(str(e))
 
@@ -27,7 +27,7 @@ async def search_shops(
     term: Annotated[str, Path(min_length=3)], db: Client = Depends(get_db_connection)
 ):
     try:
-        shops = await db.shop.find_many(where={"name": {"contains": term}})
+        shops = await db.shop.find_many(where={"name": {"contains": term, "mode":"insensitive"}})
     except PrismaError as e:
         raise CustomPrismaException(str(e))
 
