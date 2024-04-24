@@ -30,6 +30,19 @@ async def get_all_products(
         raise CustomPrismaException(error_msg=str(e))
     return products
 
+@router.get("/{id}")
+async def get_single_product(id:str, db: Client = Depends(get_db_connection)):
+    try:
+        product = await db.product.find_unique(where={
+            "product_id":id
+        })
+        if product is None:
+            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Product not found")
+    except PrismaError as e:
+        raise CustomPrismaException(str(e))
+    
+    return product
+
 
 @router.get("/featured/all")
 async def get_featured_products_from_all_shops(

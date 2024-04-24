@@ -8,6 +8,7 @@ from routes.orders_route import orders
 from routes.products_route import products
 from routes.reviews_route import reviews
 from routes.shops_route import shops
+from routes.search_route import search
 
 from utils.exceptions import (
     CustomGeneralException,
@@ -65,6 +66,7 @@ routes_list = [
     products.router,
     reviews.router,
     shops.router,
+    search.router
 ]
 
 
