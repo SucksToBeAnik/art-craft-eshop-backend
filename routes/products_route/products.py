@@ -96,6 +96,26 @@ async def get_all_products_from_user(
     return owned_products
 
 
+
+@router.get("/owner/details/{owner_id}")
+async def get_bought_and_favourite_products_by_user(owner_id: str, db: Client = Depends(get_db_connection)):
+    try:
+        user_with_products_details = await db.user.find_unique(where={
+            "user_id":owner_id
+        }, include={
+            "bought_products":True,
+            "favourite_products":True,
+            "carts":True
+        })
+
+        if user_with_products_details is None:
+            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="User not found")
+    except PrismaError as e:
+        raise CustomPrismaException(str(e))
+    
+    return user_with_products_details
+
+
 @router.post("/new", status_code=status.HTTP_201_CREATED)
 async def create_a_product(
     product_data: CreateProduct,
@@ -187,6 +207,8 @@ async def buy_a_product(product_id: str):
     pass
 
 
+
+
 @router.patch("/feature/{product_id}")
 async def feature_a_product(
     product_id: str,
@@ -249,17 +271,16 @@ async def add_product_to_favourite(
                 error_msg="Product is already added to favourite",
             )
         else:
-            await db.product.update(
+            updated_product = await db.product.update(
                 where={"product_id": product_id},
                 data={"favourited_by": {"connect": [{"user_id": user.user_id}]}},
+                include={"favourited_by":True}
             )
 
     except PrismaError as e:
         raise CustomPrismaException(str(e))
 
-    return {
-        "msg": "Added to favourite",
-    }
+    return updated_product
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
