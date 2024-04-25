@@ -30,24 +30,25 @@ async def get_all_products(
         raise CustomPrismaException(error_msg=str(e))
     return products
 
+
 @router.get("/{id}")
-async def get_single_product(id:str, db: Client = Depends(get_db_connection)):
+async def get_single_product(id: str, db: Client = Depends(get_db_connection)):
     try:
-        product = await db.product.find_unique(where={
-            "product_id":id
-        })
+        product = await db.product.find_unique(where={"product_id": id})
         if product is None:
-            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Product not found")
+            raise CustomGeneralException(
+                status_code=status.HTTP_404_NOT_FOUND, error_msg="Product not found"
+            )
     except PrismaError as e:
         raise CustomPrismaException(str(e))
-    
+
     return product
 
 
 @router.get("/featured/all")
 async def get_featured_products_from_all_shops(
-    limit: Annotated[Optional[int], Query(gt=0,le=50)] = None,
-    skip: Annotated[Optional[int], Query(gt=0,le=50)] = None,
+    limit: Annotated[Optional[int], Query(gt=0, le=50)] = None,
+    skip: Annotated[Optional[int], Query(gt=0, le=50)] = None,
     db: Client = Depends(get_db_connection),
 ):
     try:
@@ -56,26 +57,18 @@ async def get_featured_products_from_all_shops(
         final_data = []
 
         for shop in shops:
-            featured_products = await db.product.find_many(where={
-                "AND":[
-                    {
-                        "owner_shop_id":shop.shop_id
-                    },
-                    {
-                        "featured":True
-                    }
-                ]
-            })
+            featured_products = await db.product.find_many(
+                where={"AND": [{"owner_shop_id": shop.shop_id}, {"featured": True}]}
+            )
 
             updated_data = {
-                "name":shop.name,
-                "id":shop.shop_id,
-                "products":featured_products
+                "name": shop.name,
+                "id": shop.shop_id,
+                "products": featured_products,
             }
 
             final_data.append(updated_data)
 
-        
     except PrismaError as e:
         raise CustomPrismaException(error_msg=str(e))
     return final_data
@@ -96,23 +89,27 @@ async def get_all_products_from_user(
     return owned_products
 
 
-
 @router.get("/owner/details/{owner_id}")
-async def get_bought_and_favourite_products_by_user(owner_id: str, db: Client = Depends(get_db_connection)):
+async def get_bought_and_favourite_products_by_user(
+    owner_id: str, db: Client = Depends(get_db_connection)
+):
     try:
-        user_with_products_details = await db.user.find_unique(where={
-            "user_id":owner_id
-        }, include={
-            "bought_products":True,
-            "favourite_products":True,
-            "carts":True
-        })
+        user_with_products_details = await db.user.find_unique(
+            where={"user_id": owner_id},
+            include={
+                "bought_products": True,
+                "favourite_products": True,
+                "carts": True,
+            },
+        )
 
         if user_with_products_details is None:
-            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="User not found")
+            raise CustomGeneralException(
+                status_code=status.HTTP_404_NOT_FOUND, error_msg="User not found"
+            )
     except PrismaError as e:
         raise CustomPrismaException(str(e))
-    
+
     return user_with_products_details
 
 
@@ -193,6 +190,7 @@ async def update_product(
                     "product_type": product_data.product_type
                     or existing_product.product_type,
                     "available": product_data.available or existing_product.available,
+                    "featured": product_data.featured or existing_product.available,
                 },
             )
 
@@ -205,8 +203,6 @@ async def update_product(
 @router.put("/buy/{product_id}")
 async def buy_a_product(product_id: str):
     pass
-
-
 
 
 @router.patch("/feature/{product_id}")
@@ -274,7 +270,7 @@ async def add_product_to_favourite(
             updated_product = await db.product.update(
                 where={"product_id": product_id},
                 data={"favourited_by": {"connect": [{"user_id": user.user_id}]}},
-                include={"favourited_by":True}
+                include={"favourited_by": True},
             )
 
     except PrismaError as e:
@@ -313,3 +309,22 @@ async def delete_product(
 
     except PrismaError as e:
         raise CustomPrismaException(str(e))
+
+
+@router.delete("/{product_name}",status_code=status.HTTP_204_NO_CONTENT)
+async def deleteProductById(
+    product_name: str,
+    db: Client = Depends(get_db_connection),
+    user: User = Depends(get_authorized_user),
+):
+    try:
+        if user.is_admin:
+            await db.product.delete(where={
+                "name":product_name
+            })
+        else:
+            raise CustomGeneralException(status_code=status.HTTP_403_FORBIDDEN, error_msg="Only an admin can perform this action.")
+    except PrismaError as e:
+        raise CustomPrismaException(str(e))
+    
+    return 

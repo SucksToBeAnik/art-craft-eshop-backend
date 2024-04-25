@@ -74,7 +74,7 @@ model Product {
     available Boolean @default(true)
     discount Int?
 
-    featured Boolean @default(false)
+    featured Boolean @default(true)
 
     product_type String
 

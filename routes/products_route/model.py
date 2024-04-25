@@ -25,4 +25,5 @@ class UpdateProduct(Product):
     price: Annotated[Optional[int], Field(gt=0)] = None
     product_type: Optional[ProductType] = None
     available: Optional[bool] = None
+    featured: Optional[bool] = None
 

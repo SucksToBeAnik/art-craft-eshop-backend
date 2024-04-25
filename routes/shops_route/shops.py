@@ -199,3 +199,22 @@ async def delete_a_shop(
         raise CustomPrismaException(error_msg=str(e))
 
     return deleted_shop
+
+
+@router.delete("/{shop_name}", status_code=status.HTTP_204_NO_CONTENT)
+async def deleteProductById(
+    shop_name: str,
+    db: Client = Depends(get_db_connection),
+    user: User = Depends(get_authorized_user),
+):
+    try:
+        if user.is_admin:
+            await db.shop.delete(where={
+                "name":shop_name
+            })
+        else:
+            raise CustomGeneralException(status_code=status.HTTP_403_FORBIDDEN, error_msg="Only an admin can perform this action.")
+    except PrismaError as e:
+        raise CustomPrismaException(str(e))
+    
+    return
