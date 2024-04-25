@@ -15,7 +15,11 @@ async def get_all_carts_of_user(
     user: User = Depends(get_authorized_user), db: Client = Depends(get_db_connection)
 ):
     try:
-        carts = await db.cart.find_many(where={"cart_owner_id": user.user_id})
+        carts = await db.cart.find_many(where={"cart_owner_id": user.user_id},order={
+            "updated_at":"desc"
+        },include={
+            "products":True
+        })
     except PrismaError as e:
         raise CustomPrismaException(str(e))
     return carts
@@ -41,7 +45,9 @@ async def add_product_in_cart(
     db: Client = Depends(get_db_connection),
 ):
     try:
-        existing_cart = await db.cart.find_unique(where={"cart_id": cart_id})
+        existing_cart = await db.cart.find_unique(where={"cart_id": cart_id},include={
+            "products":True
+        })
 
         if existing_cart is None:
             raise CustomGeneralException(
@@ -57,6 +63,10 @@ async def add_product_in_cart(
                 status_code=status.HTTP_404_NOT_FOUND,
                 error_msg="Product not found. Can not add to cart.",
             )
+        if(existing_cart.products):
+            for product in existing_cart.products:
+                if product.product_id == existing_product.product_id:
+                    raise CustomGeneralException(status_code=status.HTTP_409_CONFLICT, error_msg="A product can be added to a cart only once")
 
         updated_cart = await db.cart.update(
             where={"cart_id": cart_id},
