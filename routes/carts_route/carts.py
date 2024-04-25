@@ -36,12 +36,16 @@ async def get_single_cart(
     db: Client = Depends(get_db_connection),
 ):
     try:
-        await db.cart.find_first(
+        cart = await db.cart.find_first(
             where={"AND": [{"cart_id": cart_id}, {"cart_owner_id": user.user_id}]},
             include={"products": True},
         )
+        if(cart is None):
+            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Cart not found")
     except PrismaError as e:
         raise CustomPrismaException(str(e))
+    
+    return cart
 
 
 @router.post("/new")
