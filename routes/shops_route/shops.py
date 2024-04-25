@@ -201,7 +201,7 @@ async def delete_a_shop(
     return deleted_shop
 
 
-@router.delete("/{shop_name}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/name/{shop_name}", status_code=status.HTTP_204_NO_CONTENT)
 async def deleteProductById(
     shop_name: str,
     db: Client = Depends(get_db_connection),

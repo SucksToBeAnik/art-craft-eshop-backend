@@ -311,7 +311,7 @@ async def delete_product(
         raise CustomPrismaException(str(e))
 
 
-@router.delete("/{product_name}",status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/name/{product_name}",status_code=status.HTTP_204_NO_CONTENT)
 async def deleteProductById(
     product_name: str,
     db: Client = Depends(get_db_connection),
