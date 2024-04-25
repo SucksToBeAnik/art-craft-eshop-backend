@@ -120,7 +120,6 @@ model Cart {
 
     order Order?
 
-
     products Product[]
 }
 
