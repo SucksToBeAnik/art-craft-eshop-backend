@@ -114,6 +114,7 @@ model Cart {
     cart_id String @id @default(cuid())
     created_at DateTime @default(now())
     updated_at DateTime @updatedAt
+    total_price Int @default(0)
 
     cart_owner_id String
     cart_owner User @relation(fields: [cart_owner_id], references: [user_id])

@@ -40,11 +40,13 @@ async def get_single_cart(
             where={"AND": [{"cart_id": cart_id}, {"cart_owner_id": user.user_id}]},
             include={"products": True},
         )
-        if(cart is None):
-            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Cart not found")
+        if cart is None:
+            raise CustomGeneralException(
+                status_code=status.HTTP_404_NOT_FOUND, error_msg="Cart not found"
+            )
     except PrismaError as e:
         raise CustomPrismaException(str(e))
-    
+
     return cart
 
 
@@ -96,13 +98,60 @@ async def add_product_in_cart(
 
         updated_cart = await db.cart.update(
             where={"cart_id": cart_id},
-            data={"products": {"connect": [{"product_id": product_id}]}},
+            data={
+                "total_price": existing_cart.total_price + existing_product.price,
+                "products": {"connect": [{"product_id": product_id}]},
+            },
             include={"products": True},
         )
     except PrismaError as e:
         raise CustomPrismaException(str(e))
 
     return updated_cart
+
+
+@router.patch("/{cart_id}/remove/{product_id}")
+async def remove_product_from_cart(
+    cart_id: str,
+    product_id: str,
+    user: User = Depends(get_authorized_user),
+    db: Client = Depends(get_db_connection),
+):
+    try:
+        existing_cart = await db.cart.find_unique(
+            where={"cart_id": cart_id}, include={"products": True}
+        )
+
+        if existing_cart is None:
+            raise CustomGeneralException(
+                status_code=status.HTTP_404_NOT_FOUND, error_msg="Cart not found"
+            )
+
+        existing_product = await db.product.find_unique(
+            where={"product_id": product_id}
+        )
+
+        if existing_product is None:
+            raise CustomGeneralException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                error_msg="Product not found. Can not add to cart.",
+            )
+        
+        updated_cart = await db.cart.update(
+            where={"cart_id": cart_id},
+            data={
+                "total_price": existing_cart.total_price - existing_product.price,
+                "products": {"disconnect": [{"product_id": product_id}]},
+            },
+            include={"products": True},
+        )
+        
+        
+    except PrismaError as e:
+        raise CustomPrismaException(str(e))
+    
+    return updated_cart
+    
 
 
 @router.delete("/{cart_id}")
