@@ -99,7 +99,7 @@ async def get_bought_and_favourite_products_by_user(
             include={
                 "bought_products": True,
                 "favourite_products": True,
-                "carts": True,
+                "carts": {"include": {"products": True}},
             },
         )
 
@@ -311,26 +311,27 @@ async def delete_product(
         raise CustomPrismaException(str(e))
 
 
-@router.delete("/name/{product_name}",status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/name/{product_name}", status_code=status.HTTP_204_NO_CONTENT)
 async def deleteProductByName(
     product_name: str,
     db: Client = Depends(get_db_connection),
     user: User = Depends(get_authorized_user),
 ):
     try:
-        existing_product = await db.product.find_unique(where={
-            "name":product_name
-        })
+        existing_product = await db.product.find_unique(where={"name": product_name})
 
         if existing_product is None:
-            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Product not found")
+            raise CustomGeneralException(
+                status_code=status.HTTP_404_NOT_FOUND, error_msg="Product not found"
+            )
         if user.is_admin:
-            await db.product.delete(where={
-                "name":product_name
-            })
+            await db.product.delete(where={"name": product_name})
         else:
-            raise CustomGeneralException(status_code=status.HTTP_403_FORBIDDEN, error_msg="Only an admin can perform this action.")
+            raise CustomGeneralException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                error_msg="Only an admin can perform this action.",
+            )
     except PrismaError as e:
         raise CustomPrismaException(str(e))
-    
-    return 
+
+    return
