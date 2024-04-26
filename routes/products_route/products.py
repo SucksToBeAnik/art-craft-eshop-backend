@@ -312,12 +312,18 @@ async def delete_product(
 
 
 @router.delete("/name/{product_name}",status_code=status.HTTP_204_NO_CONTENT)
-async def deleteProductById(
+async def deleteProductByName(
     product_name: str,
     db: Client = Depends(get_db_connection),
     user: User = Depends(get_authorized_user),
 ):
     try:
+        existing_product = await db.product.find_unique(where={
+            "name":product_name
+        })
+
+        if existing_product is None:
+            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Product not found")
         if user.is_admin:
             await db.product.delete(where={
                 "name":product_name

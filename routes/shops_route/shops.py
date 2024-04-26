@@ -202,12 +202,17 @@ async def delete_a_shop(
 
 
 @router.delete("/name/{shop_name}", status_code=status.HTTP_204_NO_CONTENT)
-async def deleteProductById(
+async def deleteShopByName(
     shop_name: str,
     db: Client = Depends(get_db_connection),
     user: User = Depends(get_authorized_user),
 ):
     try:
+        existing_shop = await db.shop.find_unique(where={
+            "name":shop_name
+        })
+        if existing_shop is None:
+            raise CustomGeneralException(status_code=status.HTTP_404_NOT_FOUND, error_msg="Shop not found")
         if user.is_admin:
             await db.shop.delete(where={
                 "name":shop_name
