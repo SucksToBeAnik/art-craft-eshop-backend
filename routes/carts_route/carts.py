@@ -55,7 +55,7 @@ async def create_a_cart(
     user: User = Depends(get_authorized_user), db: Client = Depends(get_db_connection)
 ):
     try:
-        new_cart = await db.cart.create(data={"cart_owner_id": user.user_id})
+        new_cart = await db.cart.create(data={"cart_owner_id": user.user_id},include={"products":True})
     except PrismaError as e:
         raise CustomPrismaException(str(e))
 
