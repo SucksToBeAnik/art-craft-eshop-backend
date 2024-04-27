@@ -34,7 +34,9 @@ async def get_all_products(
 @router.get("/{id}")
 async def get_single_product(id: str, db: Client = Depends(get_db_connection)):
     try:
-        product = await db.product.find_unique(where={"product_id": id},include={"owner_shop":True})
+        product = await db.product.find_unique(
+            where={"product_id": id}, include={"owner_shop": True}
+        )
         if product is None:
             raise CustomGeneralException(
                 status_code=status.HTTP_404_NOT_FOUND, error_msg="Product not found"
@@ -58,7 +60,8 @@ async def get_featured_products_from_all_shops(
 
         for shop in shops:
             featured_products = await db.product.find_many(
-                where={"AND": [{"owner_shop_id": shop.shop_id}, {"featured": True}]}
+                where={"AND": [{"owner_shop_id": shop.shop_id}, {"featured": True}]},
+                include={"favourited_by": True},
             )
 
             updated_data = {
@@ -198,8 +201,6 @@ async def update_product(
             raise CustomPrismaException(error_msg=str(e))
 
         return updated_product
-
-
 
 
 @router.patch("/feature/{product_id}")

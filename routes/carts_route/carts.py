@@ -105,6 +105,8 @@ async def add_product_in_cart(
 
         product_price = int(existing_product.price - (existing_product.price * (existing_product.discount / 100)))
 
+        print(product_price)
+
         updated_cart = await db.cart.update(
             where={"cart_id": cart_id},
             data={
