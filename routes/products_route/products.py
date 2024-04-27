@@ -200,9 +200,6 @@ async def update_product(
         return updated_product
 
 
-@router.put("/buy/{product_id}")
-async def buy_a_product(product_id: str):
-    pass
 
 
 @router.patch("/feature/{product_id}")

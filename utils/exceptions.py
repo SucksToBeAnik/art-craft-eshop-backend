@@ -24,7 +24,7 @@ class CustomAuthorizationException(Exception):
 
 
 
-RoleCanAccess = Literal["CUSTOMER","SELLER","OWNER"]
+RoleCanAccess = Literal["CUSTOMER","SELLER","OWNER","ONLY_CUSTOMER", "ONLY_SELLER"]
 
 class CustomRoleException(Exception):
     def __init__(self, role_can_access: RoleCanAccess, status_code:int = status.HTTP_403_FORBIDDEN):
@@ -37,4 +37,8 @@ class CustomRoleException(Exception):
             self.error_msg = "Only an Admin or a Seller can perform this action. Switch to seller account."
         elif self.role_can_access == "OWNER":
             self.error_msg = "Only an Admin or its owner can perform this action"
+        elif self.role_can_access == "ONLY_CUSTOMER":
+            self.error_msg = "Only a Customer can perform this action. Switch to customer account."
+        elif self.role_can_access == "ONLY_SELLER":
+            self.error_msg = "Only a Seller can perform this action. Switch to seller account."
 

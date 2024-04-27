@@ -70,6 +70,8 @@ async def add_product_in_cart(
     db: Client = Depends(get_db_connection),
 ):
     try:
+        if(user.user_type == "SELLER"):
+            raise CustomRoleException(role_can_access="ONLY_CUSTOMER")
         existing_cart = await db.cart.find_unique(
             where={"cart_id": cart_id}, include={"products": True}
         )
@@ -88,6 +90,9 @@ async def add_product_in_cart(
                 status_code=status.HTTP_404_NOT_FOUND,
                 error_msg="Product not found. Can not add to cart.",
             )
+        else:
+            if existing_product.price + existing_cart.total_price > user.balance:
+                raise CustomGeneralException(status_code=status.HTTP_403_FORBIDDEN,error_msg="You do not have sufficient balance.")
         if existing_cart.products:
             for product in existing_cart.products:
                 if product.product_id == existing_product.product_id:

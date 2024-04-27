@@ -32,6 +32,8 @@ model User {
     // user can have many carts
     carts Cart[]
 
+    orders Order[]
+
     // user can buy many products
     bought_products Product[] @relation(name: "boughtProducts")
 
@@ -60,7 +62,6 @@ model Shop {
 
     // can have many reviews
     reviews Review[]
-
 
 }
 
@@ -104,6 +105,9 @@ model Product {
 model Order {
     order_id String @id @default(cuid())
     created_at DateTime @default(now())
+
+    order_owner_id String
+    order_owner User @relation(fields: [order_owner_id],references: [user_id])
 
     owner_cart_id String @unique
     owner_cart Cart @relation(fields: [owner_cart_id],references: [cart_id],onDelete:Cascade )

@@ -59,10 +59,11 @@ async def get_active_user(user = Depends(get_authorized_user)):
 @router.post('/register', status_code=status.HTTP_201_CREATED)
 async def register_new_user(user_data:User, db:Client = Depends(get_db_connection)):
     is_admin = False
-    print(Settings.admin_emails)
+    balance = 1000
     for email in Settings.admin_emails:
         if email == user_data.email:
             is_admin = True
+            balance = 10000
     
     
     try:
@@ -74,8 +75,8 @@ async def register_new_user(user_data:User, db:Client = Depends(get_db_connectio
             'image':user_data.image,
             "address":user_data.address,
             'phone_number':user_data.phone_number,
-            'is_admin': is_admin
-
+            'is_admin': is_admin,
+            "balance":balance
         })
     except PrismaError as e:
         raise CustomPrismaException(error_msg=str(e))
@@ -127,4 +128,6 @@ async def delete_user(user_id: str, db:Client = Depends(get_db_connection), user
     return {
         "deleted_user": deleted_user
     }
+
+
 
