@@ -34,7 +34,7 @@ async def get_all_products(
 @router.get("/{id}")
 async def get_single_product(id: str, db: Client = Depends(get_db_connection)):
     try:
-        product = await db.product.find_unique(where={"product_id": id})
+        product = await db.product.find_unique(where={"product_id": id},include={"owner_shop":True})
         if product is None:
             raise CustomGeneralException(
                 status_code=status.HTTP_404_NOT_FOUND, error_msg="Product not found"

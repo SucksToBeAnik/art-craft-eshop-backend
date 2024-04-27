@@ -139,7 +139,7 @@ async def remove_product_from_cart(
         if existing_product is None:
             raise CustomGeneralException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                error_msg="Product not found. Can not add to cart.",
+                error_msg="Product not found",
             )
         
         updated_cart = await db.cart.update(
