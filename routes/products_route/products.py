@@ -138,7 +138,7 @@ async def create_a_product(
                 "manufacturer": product_data.manufacturer,
                 "images": product_data.images,
                 "price": product_data.price,
-                "discount": product_data.discount,
+                "discount": product_data.discount or 0,
                 "product_type": product_data.product_type,
                 "owner_shop_id": product_data.owner_shop_id,
             }

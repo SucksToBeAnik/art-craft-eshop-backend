@@ -93,6 +93,8 @@ async def add_product_in_cart(
         else:
             if existing_product.price + existing_cart.total_price > user.balance:
                 raise CustomGeneralException(status_code=status.HTTP_403_FORBIDDEN,error_msg="You do not have sufficient balance.")
+            if existing_product.available == False:
+                raise CustomGeneralException(status_code=status.HTTP_403_FORBIDDEN,error_msg="Product is not available.")
         if existing_cart.products:
             for product in existing_cart.products:
                 if product.product_id == existing_product.product_id:
@@ -101,10 +103,12 @@ async def add_product_in_cart(
                         error_msg="A product can be added to a cart only once",
                     )
 
+        product_price = int(existing_product.price - (existing_product.price * (existing_product.discount / 100)))
+
         updated_cart = await db.cart.update(
             where={"cart_id": cart_id},
             data={
-                "total_price": existing_cart.total_price + existing_product.price,
+                "total_price": existing_cart.total_price + product_price,
                 "products": {"connect": [{"product_id": product_id}]},
             },
             include={"products": True},
@@ -142,10 +146,11 @@ async def remove_product_from_cart(
                 error_msg="Product not found",
             )
         
+        product_price = int(existing_product.price - (existing_product.price * (existing_product.discount / 100)))
         updated_cart = await db.cart.update(
             where={"cart_id": cart_id},
             data={
-                "total_price": existing_cart.total_price - existing_product.price,
+                "total_price": existing_cart.total_price - product_price,
                 "products": {"disconnect": [{"product_id": product_id}]},
             },
             include={"products": True},

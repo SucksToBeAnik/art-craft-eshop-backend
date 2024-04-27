@@ -73,7 +73,7 @@ model Product {
     images String[]
     price Int
     available Boolean @default(true)
-    discount Int?
+    discount Int @default(0)
 
     featured Boolean @default(true)
 
