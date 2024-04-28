@@ -148,6 +148,7 @@ async def update_a_shop(
     user: User = Depends(get_authorized_user),
 ):
     try:
+        
         existing_shop = await db.shop.find_first(where={"shop_id": id})
 
         if existing_shop is None:
@@ -155,6 +156,9 @@ async def update_a_shop(
                 status_code=status.HTTP_404_NOT_FOUND,
                 error_msg="Invalid shop id provided. Shop does not exist!",
             )
+        
+        if(user.user_type == "CUSTOMER"):
+            raise CustomRoleException(role_can_access="SELLER")
 
         if user.is_admin or user.user_id == existing_shop.owner_id:
             pass
