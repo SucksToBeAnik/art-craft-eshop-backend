@@ -1,17 +1,12 @@
 # Welcome to Art&Craft Eshop!
+`COMPLETED`
 
-**[Live Link]()** - coming soon...
+**[Live Link](https://art-craft-eshop-backend.onrender.com)** 
 
 
 ## Project Members
 * **Anik@22101577**
 `aljami.islam.anik@g.bracu.ac.bd`
-
-* **Shimanta@add_student_id**
-`add email`
-
-* **Mridul@student_id**
-`add email`
 
 ## General instructions
 
@@ -34,22 +29,3 @@
 > - Then finally run:
 > `python main.py` or `uvicorn main:app -reload`
 > This should start running the fastapi app in your localmachine.
-
-## API Routes
-**`!`** This section will be updated over time **`!`**
-
-### `/users`
-- [ ]  `/` - Get all users
-
-
-### `/products`
-- [ ]  `/` - Get all products
-
-### `/shops`
-- [ ]  `/` - Get all shops
-
-### `/carts`
-- [ ]  `/` - Get all carts
-
-### `/reviews`
-- [ ]  `/` - Get all reviews
